@@ -21,6 +21,7 @@ library(maptools)
 #setting working directory
 setwd("C:/Users/Anumita Jain/Desktop/Junior Year/ccl-capstone-walkability/Data")
 
+
 #loading data-----
 sidewalks <- st_read("sidewalks", "sidewalks")
 lrtstations <- st_read("lrtstations", "lrtstation")
@@ -29,6 +30,10 @@ bikeways <- st_read("bikeways", "bikeways")
 zones <- st_read("zones", "ElementaryAttendanceZones1920")
 busstops <- st_read("busstops", "busstops")
 busroutes <- st_read("busroutes", "busroutes")
+
+schools <- st_read("schools", "schools")
+schools <- subset(schools, DistName == "HOUSTON ISD")
+
 
 #cleaning data-----
 clean_shape <- function(.data, .crs=nad83) {
@@ -48,6 +53,8 @@ clean_shape(bikeways)
 clean_shape(zones)
 clean_shape(busstops)
 clean_shape(busroutes)
+clean_shape(schools)
+
 
 #notes on shapes-----
 #sidewalks = multilinestring
@@ -58,6 +65,7 @@ clean_shape(busroutes)
 #busroutes = multilinestring
 #zones = polygon
 
+
 #calculating percentage -----
 
 zoneslrts <- st_join(lrtstations, zones)
@@ -65,20 +73,31 @@ rankinglrts <- tabyl(zoneslrts, Elementary)
 
 zoneslrtl <- st_intersection(lrtlines,zones)
 rankinglrtl <- tapply(st_length(zoneslrtl), zoneslrtl$Elementary,sum)
-View(rankinglrtl)
 
 zonesbus <- st_join(busstops, zones)
 rankingbus <- tabyl(zonesbus, Elementary)
 
 zonesbusr <- st_intersection(busroutes, zones)
 rankingbusr <- tapply(st_length(zonesbusr), zonesbusr$Elementary, sum)
-View(rankingbusr)
 
 zonesbike <- st_join(bikeways, zones)
 rankingbike <- tapply(st_length(zonesbike), zonesbike$Elementary, sum)
-View(rankingbike)
 
 zonessw <- st_join(sidewalks,zones)
 rankingsidewalk <- tapply(st_length(zonessw), zonessw$Elementary,sum)
-View(rankingsidewalk)
 
+
+
+#trying to create 2-mile isochrone map-----
+library(devtools)
+library(osrm)
+
+poe <- osrm::osrmIsometric(
+  loc = c(29.7274389868503, -95.40736370540988),
+  breaks = seq(from = 0.1, to = 3218, length.out = 4),
+  exclude = NULL,
+  res = 30,
+  returnclass = "sf",
+  osrm.server = getOption("osrm.server"),
+  osrm.profile = getOption("foot")
+)
