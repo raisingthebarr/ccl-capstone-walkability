@@ -17,6 +17,7 @@ library(ggplot2)
 library(sp)
 library(dplyr)
 library(maptools)
+library(opentripplanner)
 
 #setting working directory
 setwd("C:/Users/Anumita Jain/Desktop/Junior Year/ccl-capstone-walkability/Data")
@@ -65,6 +66,32 @@ clean_shape(schools)
 #busroutes = multilinestring
 #zones = polygon
 
+#experimenting with opentripplanner-----
+library(rJava)
+library(opentripplanner)
+
+
+otp_check_java()
+
+path_data <- file.path("C:/Users/Anumita Jain/Desktop/Junior Year/ccl-capstone-walkability/Data", "OTP")
+dir.create(path_data)
+path_otp <- otp_dl_jar(path_data, cache = FALSE)
+log1 <- otp_build_graph(otp = path_otp , dir = path_data) 
+log2 <- otp_setup(otp = path_otp, dir = path_data)
+otpcon <- otp_connect()
+otp_plan(otp_connect, fromPlace = c(29.722388419368436, -95.40204852710573),
+         toPlace = c(29.727476254276088, -95.40782504533031))
+
+
+path_data <- file.path("C:/Users/Anumita Jain/Desktop/Junior Year/ccl-capstone-walkability/Data", "OTP")
+dir.create(path_data) 
+path_otp <- otp_dl_jar(path_data, cache = FALSE)
+log1 <- otp_build_graph(otp = path_otp, dir = path_data) 
+log2 <- otp_setup(otp = path_otp, dir = path_data)
+otpcon <- otp_connect()
+route <- otp_plan(otpcon, 
+                  fromPlace = c(), 
+                  toPlace = c())
 
 #calculating percentage -----
 
@@ -129,3 +156,4 @@ poe <- osrm::osrmIsometric(
   osrm.server = getOption("osrm.server"),
   osrm.profile = getOption("foot")
 )
+
